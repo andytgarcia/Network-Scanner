@@ -1,7 +1,3 @@
-from asyncio import timeout
-from tabnanny import verbose
-from tkinter.ttk import Label
-
 import scapy.all as scapy
 from scapy.layers.l2 import ARP, Ether
 from scapy.layers.inet import IP, UDP, TCP
@@ -13,6 +9,7 @@ import threading
 from queue import Queue
 import socket
 import manuf
+import os
 
 
 def get_args():
@@ -91,10 +88,10 @@ def scan_ip(ip, results):
     answered_list = scapy.srp(arp_request_broadcast, timeout=3, verbose=False)[0]
 
     for sent, received in answered_list:
-        print("Received: ", received.psrc, received.hwsrc)
-        hostname = os_fingerprinting(str(ip))
+        print("Received -->", received.psrc)
+        operating_system = os_fingerprinting(str(ip))
         manufacturer = determine_manufacturer(received.hwsrc)
-        results.append({"ip": received.psrc, "mac": received.hwsrc, "OS": hostname, "Manufacturer": manufacturer})
+        results.append({"ip": received.psrc, "mac": received.hwsrc, "OS": operating_system, "Manufacturer": manufacturer})
 
 def threader(q, results):
     while True:
@@ -131,6 +128,11 @@ def print_results(clients):
 
 
 if __name__ == '__main__':
+    os.system('clear')
+    print("NetScan")
+    print("Running from", socket.gethostname(), "on", socket.gethostbyname(socket.gethostname()))
+    print("Running NetScan...")
+    print("------------------------------------------------------------------------------------------------------------------------------")
     args = get_args()
     scan_results = scan(args.target, args.num_threads)
     print_results(scan_results)
